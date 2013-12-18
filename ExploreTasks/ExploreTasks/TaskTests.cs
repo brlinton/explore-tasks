@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using System.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Xunit;
-using System;
 
 namespace ExploreTasks
 {
@@ -21,9 +21,21 @@ namespace ExploreTasks
         {
             var currentTaskId = await Task.Run(() => Task.CurrentId);
 
-            Console.WriteLine(currentTaskId);
             Assert.True(currentTaskId != null, "Expecting the task to have an ID");
             Assert.True(currentTaskId > 0, "Expecting the task to have a positive integer ID");
+        }
+
+        [Fact]
+        public async void TaskDelayDelaysTheRunningTask()
+        {
+            var millisecondDelay = 100;
+
+            var stopwatch = Stopwatch.StartNew();
+            await Task.Run(() => { Task.Delay(millisecondDelay); });
+            stopwatch.Stop();
+
+            Assert.NotEqual(0, stopwatch.ElapsedMilliseconds);
+            Assert.True(stopwatch.ElapsedMilliseconds >= millisecondDelay, "Expected elapsed time to take longer than the delay");
         }
     }
 }
