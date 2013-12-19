@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -37,5 +38,29 @@ namespace ExploreTasks
             Assert.NotEqual(0, stopwatch.ElapsedMilliseconds);
             Assert.True(stopwatch.ElapsedMilliseconds >= millisecondDelay, "Expected elapsed time to take longer than the delay");
         }
+
+        [Fact]
+        public async void TaskDelayDoesNotDelayOutsideOfATask()
+        {
+            var millisecondDelay = 100;
+
+            var stopwatch = Stopwatch.StartNew();
+            Task.Delay(millisecondDelay);
+            stopwatch.Stop();
+
+            Assert.NotEqual(0, stopwatch.ElapsedMilliseconds);
+            Assert.True(stopwatch.ElapsedMilliseconds < millisecondDelay, "Expected elapsed time to take longer than the delay");
+        }
+
+        [Fact]
+        // http://msdn.microsoft.com/en-us/library/hh228607(v=vs.110).aspx
+        public async void CanCreateATaskFromPreComputedValue()
+        {
+            var test = await Task.FromResult(true);
+
+            Assert.Equal(true, test);
+        }
+
+        
     }
 }
