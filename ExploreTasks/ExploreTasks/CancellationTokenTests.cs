@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -6,6 +7,21 @@ namespace ExploreTasks
 {
     public class CancellationTokenTests
     {
+        private readonly Func<CancellationToken, int> CountUntilCancelled = (token) =>
+        {
+            var count = 0;
+
+            while (true)
+            {
+                if (token.IsCancellationRequested)
+                    break;
+
+                count++;
+            }
+
+            return count;
+        };
+
         [Fact]
         // http://stackoverflow.com/questions/3712939/cancellation-token-in-task-constructor-why
         public async void CancellationTokenIsMonitored()
@@ -13,20 +29,7 @@ namespace ExploreTasks
             var token = new CancellationTokenSource();
             token.Cancel();
 
-            var result = await Task.Run(() =>
-            {
-                var count = 0;
-
-                while (true)
-                {
-                    if (token.IsCancellationRequested)
-                        break;
-
-                    count++;
-                }
-
-                return count;
-            }, token.Token);
+            var result = await Task.Run(() => CountUntilCancelled(token.Token), token.Token);
 
             Assert.Equal(0, result);
         }
@@ -35,21 +38,8 @@ namespace ExploreTasks
         public async void CancellationTokenStopsRequestAfterStarting()
         {
             var token = new CancellationTokenSource();
-            
-            var result = await Task.Run(() =>
-            {
-                var count = 0;
 
-                while (true)
-                {
-                    if (token.IsCancellationRequested)
-                        break;
-
-                    count++;
-                }
-
-                return count;
-            }, token.Token);
+            var result = await Task.Run(() => CountUntilCancelled(token.Token), token.Token);
             
             token.Cancel();
 
@@ -62,21 +52,8 @@ namespace ExploreTasks
         {
             var count = -10;
             var token = new CancellationTokenSource();
-            
-            var task = new Task<int>(() =>
-            {
-                count = 0;
 
-                while (true)
-                {
-                    if (token.IsCancellationRequested)
-                        break;
-
-                    count++;
-                }
-
-                return count;
-            }, token.Token);
+            var task = new Task(() => CountUntilCancelled(token.Token), token.Token);
             
             token.Cancel();
 
