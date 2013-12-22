@@ -5,6 +5,7 @@ using Xunit;
 
 namespace ExploreTasks
 {
+    // http://stackoverflow.com/questions/3712939/cancellation-token-in-task-constructor-why
     public class CancellationTokenTests
     {
         private readonly Func<CancellationToken, int> CountUntilCancelled = (token) =>
@@ -23,7 +24,6 @@ namespace ExploreTasks
         };
 
         [Fact]
-        // http://stackoverflow.com/questions/3712939/cancellation-token-in-task-constructor-why
         public async void CancellationTokenIsMonitored()
         {
             var token = new CancellationTokenSource();
@@ -47,7 +47,6 @@ namespace ExploreTasks
         }
 
         [Fact]
-        // http://stackoverflow.com/questions/3712939/cancellation-token-in-task-constructor-why
         public async void CancellingBeforeInvocationPreventsActionExecution()
         {
             var count = -10;
